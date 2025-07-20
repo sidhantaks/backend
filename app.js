@@ -3,11 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const productRoutes = require('./routes/products');
+const userRoutes = require('./routes/users');
 const { constructMongoUri } = require('./helpers/dbHelper'); 
 const app = express();
-
-//const mongoUrl = 'mongodb+srv://sidhantaks:ssp1234@cluster0.wijrd8t.mongodb.net/mern_testing?retryWrites=true&w=majority';
-//const mongoUrl = 'mongodb+srv://krishnaonlinetutorials:qwerty123456789@cluster0.jwtby.mongodb.net/mern_testing?retryWrites=true&w=majority';
 
 const mongoUrl = constructMongoUri(); // Use the helper function to construct the MongoDB URI
 
@@ -19,6 +17,7 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(err => console.error('Error connecting to MongoDB:', err.message));
 
 app.use('/products', productRoutes);
+app.use('/users', userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

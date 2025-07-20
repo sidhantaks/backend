@@ -1,0 +1,93 @@
+const User = require('../models/users');
+const Auth = require('../models/auth');
+
+// let usersCollection;
+// let authCollection;
+
+const postUser = async (req, res) => {
+  const newUser = new User({ id: Date.now(), ...req.body });
+  await newUser.save();
+  const newAuth = new Auth({ id: Date.now(), ...req.body });
+  await newAuth.save();
+  res.status(201).json(newUser);
+}
+
+const getUsers = async (req, res) => {
+  const users = await User.find();
+  res.status(201).json(users);
+}
+
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id); // Mongoose auto-converts to ObjectId
+    if (user) res.json(user);
+    else res.status(404).json({ message: "User not found" });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user", error });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const updatedUser = await User.findOneAndUpdate(
+      { id: id },
+      req.body,
+      { new: true } // returns the updated document
+    );
+    if (updatedUser) {
+      res.json(updatedUser);
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user", error });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const result = await User.deleteOne({ id: Number(req.params.id) });
+    if (result.deletedCount === 1) {
+      res.json({ message: "User deleted successfully" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting user", error });
+  }
+};
+
+// Login user
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+   console.log("Login attempt:");
+   console.log("Email:", email);
+   console.log("Password:", password);
+
+  try {
+    const user = await Auth.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    if (user.password !== password) {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    res.json({ message: 'Login successful', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Login failed', error: err.message });
+  }
+};
+
+module.exports = {
+    postUser, 
+    getUsers,
+    getUserById,    
+    updateUser,
+    deleteUser, 
+    loginUser
+}

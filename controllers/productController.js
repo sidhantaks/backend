@@ -4,6 +4,7 @@ let productsCollection;
 
 const postProduct = async (req, res) => {
   const newProduct = new Product({ id: Date.now(), ...req.body });
+  //const newProduct = new User({ id: Date.now(), ...req.body });
   await newProduct.save();
   res.status(201).json(newProduct);
 }
