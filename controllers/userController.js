@@ -1,13 +1,16 @@
 const User = require('../models/users');
 const Auth = require('../models/auth');
+const CryptoJs = require('crypto-js');
 
 // let usersCollection;
 // let authCollection;
 
 const postUser = async (req, res) => {
+  const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYPTO_SECRET_KEY).toString(CryptoJs.enc.Utf8);
+  // console.log(req.body.password, decryptPassword, process.env.CRYPTO_SECRET_KEY);
   const newUser = new User({ id: Date.now(), ...req.body });
   await newUser.save();
-  const newAuth = new Auth({ id: Date.now(), ...req.body });
+  const newAuth = new Auth({ id: Date.now(), email: req.body.email, password: decryptPassword });
   await newAuth.save();
   res.status(201).json(newUser);
 }
@@ -60,11 +63,8 @@ const deleteUser = async (req, res) => {
 
 // Login user
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-   console.log("Login attempt:");
-   console.log("Email:", email);
-   console.log("Password:", password);
+const { email, password } = req.body;
+const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYPTO_SECRET_KEY).toString(CryptoJs.enc.Utf8);
 
   try {
     const user = await Auth.findOne({ email });
@@ -73,7 +73,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    if (user.password !== password) {
+    if (user.password !== decryptPassword) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
