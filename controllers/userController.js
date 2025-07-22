@@ -1,9 +1,7 @@
+const CryptoJs = require('crypto-js');
+const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 const Auth = require('../models/auth');
-const CryptoJs = require('crypto-js');
-
-// let usersCollection;
-// let authCollection;
 
 const postUser = async (req, res) => {
   const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYPTO_SECRET_KEY).toString(CryptoJs.enc.Utf8);
@@ -68,7 +66,7 @@ const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYP
 
   try {
     const user = await Auth.findOne({ email });
-
+    console.log(user);
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
@@ -76,8 +74,17 @@ const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYP
     if (user.password !== decryptPassword) {
       return res.status(401).json({ message: 'Invalid password' });
     }
-
-    res.json({ message: 'Login successful', user });
+    const role = user.email === 'sidhantaks@gmail.com' ? 'admin' : 'user';
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        email: user.email,
+        role: role
+      }
+      , process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.JWT_EXPIRATION },
+    );
+    res.json({ message: 'Login successful', user: { email: user.email, role }, token: token });
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
   }
