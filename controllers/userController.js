@@ -66,7 +66,7 @@ const decryptPassword = CryptoJs.AES.decrypt(req.body.password, process.env.CRYP
 
   try {
     const user = await Auth.findOne({ email });
-    console.log(user);
+    //console.log(user);
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
