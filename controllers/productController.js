@@ -44,7 +44,6 @@ const getProductById = async (req, res) => {
 // Update product by _id
 const updateProduct = async (req, res) => {
   try {
-
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
