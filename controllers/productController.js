@@ -1,22 +1,34 @@
-const Product = require('../models/products');
+const Product = require("../models/products");
 
 // Create a new product
 const postProduct = async (req, res) => {
   try {
     const { title, price, brand, stock } = req.body;
-
+    console.log("Request Body:", req.body);
+    console.log("File Upload:", req.file);
+    const image = req.file
+      ? {
+          filename: req.file.filename,
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          path: req.file.path,
+          size: req.file.size,
+        }
+      : null;
+    console.log(image);
     const newProduct = new Product({
       title,
       price,
       brand,
-      stock
+      stock,
+      image,
     });
 
     const savedProduct = await newProduct.save();
     res.status(201).json(savedProduct);
   } catch (err) {
-    console.error('Create Error:', err);
-    res.status(500).json({ message: 'Failed to create product.' });
+    console.error("Create Error:", err);
+    res.status(500).json({ message: "Failed to create product." });
   }
 };
 
